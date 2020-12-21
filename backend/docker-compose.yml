@@ -1,0 +1,10 @@
+version: '3'
+services:
+  web:
+    build: .
+    environment:
+      - SERVER_PORT=3000
+      - SOCKET_PORT=3001
+    ports:
+      - "3000:3000"
+      - "3001:3001"
