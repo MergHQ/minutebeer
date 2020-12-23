@@ -13,7 +13,6 @@ import { Option } from 'fp-ts/lib/Option'
 export interface User {
   id?: string
   nickname: string
-  tier: 0 | 1 | 2
   tkoAlyUserId: number
   email: string
   role: string
