@@ -1,6 +1,6 @@
 import React from 'react'
-import {sendAction} from '../../utils/actionDispatcher'
-import {fetchMoreParticipantsAction} from '../../utils/actions'
+import { sendAction } from '../../utils/actionDispatcher'
+import { fetchMoreParticipantsAction } from '../../utils/actions'
 import StatCard from './components/StatCard'
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
 
 export default class AdminPage extends React.Component<Props, any> {
   render() {
-    const {currentDrink, adminStats} = this.props
+    const { currentDrink, adminStats } = this.props
     console.log(adminStats)
     return (
       <div>
@@ -23,11 +23,11 @@ export default class AdminPage extends React.Component<Props, any> {
         <br />
         <br />
         <br />
-        <StatCard 
-          participants={adminStats.participants} 
-          totalDrinks={adminStats.drinks} 
-          holic={adminStats.holic} 
-          nonHolic={adminStats.nonHolic} 
+        <StatCard
+          participants={adminStats.participants}
+          totalDrinks={adminStats.drinks}
+          holic={adminStats.holic}
+          nonHolic={adminStats.nonHolic}
         />
       </div>
     )

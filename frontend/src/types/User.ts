@@ -1,8 +1,8 @@
-import {UserDrink} from "./UserDrink"
+import { UserDrink } from './UserDrink'
 
 export interface User {
-  id?: string,
-  nickname: string,
+  id?: string
+  nickname: string
   tier: 0 | 1 | 2
 }
 

@@ -2,14 +2,14 @@ import React from 'react'
 import Bacon from 'baconjs'
 
 import Signup from './signupPage/signupModel'
-import {userRegistrationStore} from '../stores/userRegistrationStore'
-import {InitialState} from '../types/InitialState'
-import {pageStateStore} from '../stores/pageStateStore'
-import {User} from '../types/User'
+import { userRegistrationStore } from '../stores/userRegistrationStore'
+import { InitialState } from '../types/InitialState'
+import { pageStateStore } from '../stores/pageStateStore'
+import { User } from '../types/User'
 import CompetitionPage from './competitionPage/competitionModel'
-import {drinkStore} from '../stores/drinkStore'
-import {drinkTimerStore} from '../stores/drinkTimerStore'
-import {competitionAdminStore} from '../stores/competitionAdminStore'
+import { drinkStore } from '../stores/drinkStore'
+import { drinkTimerStore } from '../stores/drinkTimerStore'
+import { competitionAdminStore } from '../stores/competitionAdminStore'
 import AdminPage from './adminPage/adminPageModel'
 
 export function createModel(initialState: InitialState) {
@@ -21,7 +21,7 @@ export function createModel(initialState: InitialState) {
     return Bacon.combineTemplate({
       drinkTimer: drinkTimerP,
       adminStats: adminStatsStoreP
-    }).map(({drinkTimer, adminStats}) => (
+    }).map(({ drinkTimer, adminStats }) => (
       <div className="container">
         <AdminPage currentDrink={drinkTimer.stage} adminStats={adminStats} />
       </div>
@@ -36,7 +36,7 @@ export function createModel(initialState: InitialState) {
     user: userP,
     drinks: drinkStoreP,
     drinkTimer: drinkTimerP
-  }).map(({pageState, user, drinks, drinkTimer}) => {
+  }).map(({ pageState, user, drinks, drinkTimer }) => {
     const currentPage = handlePage(pageState, user, drinks, drinkTimer)
     return (
       <div className="container">
@@ -48,10 +48,10 @@ export function createModel(initialState: InitialState) {
   return appP
 }
 
-function handlePage(currentPage: string, user: User, drinks: string[], {stage, isModalOpen}: {stage: number, isModalOpen: boolean}) {
+function handlePage(currentPage: string, user: User, drinks: string[], { stage, isModalOpen }: { stage: number, isModalOpen: boolean }) {
   if (!user) {
     return <Signup />
   } else {
-    return <CompetitionPage user={user} drinks={drinks} currentDrink={stage} isModalOpen={isModalOpen}  />
+    return <CompetitionPage user={user} drinks={drinks} currentDrink={stage} isModalOpen={isModalOpen} />
   }
 }

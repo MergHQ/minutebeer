@@ -11,3 +11,5 @@ exports.up = function (knex) {
 }
 
 exports.down = function (knex) {}
+
+exports.config = { transactions: false }

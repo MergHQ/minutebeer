@@ -1,9 +1,9 @@
 import React from 'react'
-import {Card, CardBody, CardTitle} from 'reactstrap'
+import { Card, CardBody, CardTitle } from 'reactstrap'
 import DrinkButtons from './DrinkButtons';
-import {DrinkType} from '../../../types/UserDrink'
-import {sendAction} from '../../../utils/actionDispatcher'
-import {addDrinkAction} from '../../../utils/actions'
+import { DrinkType } from '../../../types/UserDrink'
+import { sendAction } from '../../../utils/actionDispatcher'
+import { addDrinkAction } from '../../../utils/actions'
 
 interface Props {
 

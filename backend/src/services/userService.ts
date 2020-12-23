@@ -2,24 +2,54 @@ import db from '../database'
 import uuid from 'uuid'
 import { UserDrink } from './drinkService'
 import jwt from 'jsonwebtoken'
+import { taskEither as F, option as O } from '../fptsExtensions'
+import { pipe } from 'fp-ts/lib/function'
+import { getUserInfo, TkoAlyUser } from '../client/userServiceClient'
+import { ServiceError } from '../error'
+import { AxiosError } from 'axios'
+import { TaskEither } from 'fp-ts/lib/TaskEither'
+import { Option } from 'fp-ts/lib/Option'
 
 export interface User {
   id?: string
   nickname: string
   tier: 0 | 1 | 2
+  tkoAlyUserId: number
+  email: string
+  role: string
 }
 
 export interface UserDrinksObject extends User {
   drinks: UserDrink[]
 }
 
-export function createUser(user: any): Promise<User> {
-  const validatedUser = validateUser(user)
-  return db('users')
-    .insert(validatedUser)
-    .returning(['id', 'nickname', 'tier'])
-    .then(() => validatedUser)
-}
+export const createUser = (user: any, token: string): TaskEither<ServiceError, User> =>
+  pipe(
+    F.tryCatch(
+      () => getUserInfo(token),
+      (e: AxiosError) =>
+        ({
+          message: 'Cannot fetch TKO-äly user',
+          status: e.response ? e.response.status : 500,
+          pureErrorMessage: e.message,
+        } as ServiceError)
+    ),
+    F.flatMap(tekisUser => validateUser(user, tekisUser)),
+    F.flatMap(insertUser)
+  )
+
+const insertUser = (user: User) =>
+  F.tryCatch(
+    () =>
+      db('users')
+        .insert(user)
+        .then(() => user),
+    (e: Error) => ({
+      message: 'Failed to save user',
+      pureErrorMessage: e.message,
+      status: 500,
+    })
+  )
 
 export function getAllUsers(): Promise<UserDrinksObject[]> {
   return db('users')
@@ -34,33 +64,69 @@ export function getAllUsers(): Promise<UserDrinksObject[]> {
     .then(toUserDrinksObject)
 }
 
-export function getUserById(userId: string): Promise<User> {
-  return db('users')
-    .where('id', userId)
-    .first()
-    .then((user: User) => user)
-}
+export const getUserById = (token: string): TaskEither<ServiceError, Option<User>> =>
+  pipe(
+    F.tryCatch(
+      () => getUserInfo(token),
+      (e: AxiosError) => ({
+        message: 'Failed to resolve user',
+        status: e.response.status,
+        pureErrorMessage: e.message,
+      })
+    ),
+    F.flatMap(({ id }) => getById(id))
+  )
 
-function validateUser(user: any): User {
+const getById = (tkoAlyId: number) =>
+  F.tryCatch(
+    () =>
+      db('users')
+        .where('tkoAlyUserId', tkoAlyId)
+        .first()
+        .then((user: User | null) => user)
+        .then(O.fromNullable),
+    (e: Error) => ({
+      message: 'Failed to get user',
+      status: 500,
+      pureErrorMessage: e.message,
+    })
+  )
+
+function validateUser(
+  user: any,
+  { id, email, role }: TkoAlyUser
+): TaskEither<ServiceError, User> {
   const { nickname, tier } = user
   if (!nickname || !tier) {
-    return null
+    return F.left({
+      pureErrorMessage: 'Missing post data',
+      status: 400,
+      message: 'Missing post data',
+    })
   }
 
   if (!nickname.length) {
-    return null
+    return F.left({
+      pureErrorMessage: 'Missing post data',
+      status: 400,
+      message: 'Missing post data',
+    })
   }
 
-  return {
+  return F.of({
     id: uuid.v4(),
     nickname,
     tier,
-  }
+    tkoAlyUserId: id,
+    email,
+    role,
+  })
 }
 
 function toUserDrinksObject(dbResult: any[]): UserDrinksObject[] {
-  const map = new Map<String, UserDrinksObject>()
-  dbResult.forEach(object => {
+  //const map = new Map<String, UserDrinksObject>()
+  return []
+  /* dbResult.forEach(object => {
     const { id, nickname, tier, drinkType, userId } = object
     if (map.has(id)) {
       if (drinkType !== null) {
@@ -76,11 +142,11 @@ function toUserDrinksObject(dbResult: any[]): UserDrinksObject[] {
     }
   })
 
-  return Array.from(map.values())
+  return Array.from(map.values())*/
 }
 
 export function createUserToken(user: User) {
-  const token = jwt.sign(user.id, process.env.JWT_SECRET)
+  const token = jwt.sign({ id: `${user.tkoAlyUserId}` }, process.env.JWT_SECRET)
   return { ...user, token }
 }
 

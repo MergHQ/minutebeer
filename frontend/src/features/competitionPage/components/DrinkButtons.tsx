@@ -1,9 +1,9 @@
 import React from 'react'
-import {DrinkType} from '../../../types/UserDrink'
+import { DrinkType } from '../../../types/UserDrink'
 import { Button } from 'reactstrap'
 
-export default (props: {handleClick: (dt: DrinkType) => void}) => {
-  const {handleClick} = props
+export default (props: { handleClick: (dt: DrinkType) => void }) => {
+  const { handleClick } = props
   return (
     <div>
       <Button onClick={() => handleClick(DrinkType.ALCOHOL)}>

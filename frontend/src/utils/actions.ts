@@ -1,5 +1,5 @@
-import {Action} from './actionDispatcher'
-import {DrinkType} from '../types/UserDrink'
+import { Action } from './actionDispatcher'
+import { DrinkType } from '../types/UserDrink'
 
 export const updateRegistrationDetailsAction: Action<any> = 'updateRegistrationDetails'
 export const createUserAction: Action<any> = 'createUser'

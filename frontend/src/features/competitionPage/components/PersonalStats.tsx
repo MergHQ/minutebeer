@@ -1,6 +1,6 @@
 import React from 'react'
-import {User} from '../../../types/User'
-import {Card, CardBody} from 'reactstrap'
+import { User } from '../../../types/User'
+import { Card, CardBody } from 'reactstrap'
 
 interface Props {
   currentDrink: number
@@ -10,7 +10,7 @@ interface Props {
 
 export default class PersonalStats extends React.Component<Props, any> {
   render() {
-    const {currentDrink, user, drinks} = this.props
+    const { currentDrink, user, drinks } = this.props
     return (
       <div>
         <Card>

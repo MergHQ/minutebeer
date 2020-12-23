@@ -1,4 +1,12 @@
-export const createTemplate = ({title, body, initialState}: {title: string, body: string, initialState: string}) => {
+export const createTemplate = ({
+  title,
+  body,
+  initialState,
+}: {
+  title: string
+  body: string
+  initialState: string
+}) => {
   return `
   <!DOCTYPE html>
   <html>
@@ -16,4 +24,4 @@ export const createTemplate = ({title, body, initialState}: {title: string, body
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/4.8.0/reactstrap.min.js"></script>
   </html>
   `
-} 
+}

@@ -1,7 +1,7 @@
 import React from 'react'
-import {Card, CardTitle, CardBody, Button, Form, FormGroup, Label, Input} from 'reactstrap'
-import {sendAction} from '../../../utils/actionDispatcher'
-import {updateRegistrationDetailsAction} from '../../../utils/actions'
+import { Card, CardTitle, CardBody, Button, Form, FormGroup, Label, Input } from 'reactstrap'
+import { sendAction } from '../../../utils/actionDispatcher'
+import { updateRegistrationDetailsAction } from '../../../utils/actions'
 
 export default (props: any) => {
   return (
@@ -40,9 +40,9 @@ function RegistrationForm(props: any) {
 }
 
 function handleNicknameChange(e: React.ChangeEvent<HTMLInputElement>) {
-  sendAction(updateRegistrationDetailsAction, {nickname: e.target.value})
+  sendAction(updateRegistrationDetailsAction, { nickname: e.target.value })
 }
 
 function handleTierChange(e: React.ChangeEvent<HTMLInputElement>) {
-  sendAction(updateRegistrationDetailsAction, {tier: Number(e.target.value)})
+  sendAction(updateRegistrationDetailsAction, { tier: Number(e.target.value) })
 }

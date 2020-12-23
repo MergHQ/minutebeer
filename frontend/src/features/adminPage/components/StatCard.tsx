@@ -10,8 +10,8 @@ interface Props {
 
 export default class StatCard extends React.Component<Props, any> {
   render() {
-    const {participants, totalDrinks, nonHolic, holic} = this.props
-    return  (
+    const { participants, totalDrinks, nonHolic, holic } = this.props
+    return (
       <div>
         <Container>
           <Row>

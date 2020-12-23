@@ -1,8 +1,8 @@
 import React from 'react'
-import {Modal, ModalBody, ModalFooter} from 'reactstrap'
-import {sendAction} from '../../../utils/actionDispatcher'
-import {addDrinkAction} from '../../../utils/actions'
-import {DrinkType} from '../../../types/UserDrink'
+import { Modal, ModalBody, ModalFooter } from 'reactstrap'
+import { sendAction } from '../../../utils/actionDispatcher'
+import { addDrinkAction } from '../../../utils/actions'
+import { DrinkType } from '../../../types/UserDrink'
 import DrinkButtons from './DrinkButtons';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 export default class DrinkAlertModal extends React.Component<Props, any> {
 
   render() {
-    const {isModalOpen, drinkNumber} = this.props
+    const { isModalOpen, drinkNumber } = this.props
     return (
       <div>
         <Modal isOpen={isModalOpen}>

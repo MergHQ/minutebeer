@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from './components/Header'
-import {User} from '../../types/User'
+import { User } from '../../types/User'
 import ProgressBar from './components/ProgressBar'
 import DrinkAlertModal from './components/DrinkAlertModal'
 import PersonalStats from './components/PersonalStats'
@@ -15,7 +15,7 @@ interface Props {
 
 export default class CompetitionPage extends React.Component<Props, any> {
   render() {
-    const {user, drinks, currentDrink, isModalOpen} = this.props
+    const { user, drinks, currentDrink, isModalOpen } = this.props
     return (
       <div>
         <Header user={user} />
