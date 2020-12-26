@@ -1,9 +1,11 @@
+import { UserGame } from './Game'
 import { User } from './User'
 
 export interface InitialState {
   authentication: User
   currentPage: string
-  competitionState: {
+  games: UserGame[]
+  /*competitionState: {
     userDrinks: { drinkType: number }[]
     stage: number
     isModalOpen: boolean
@@ -13,5 +15,5 @@ export interface InitialState {
       nonHolic: number
       holic: number
     }
-  }
+  }*/
 }

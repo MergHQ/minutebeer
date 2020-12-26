@@ -2,12 +2,12 @@ import express from 'express'
 import {
   getAllUsers,
   parseUserToken,
-  getUserById,
+  getUserWithToken,
   createUser,
   createUserToken,
 } from './services/userService'
 import * as bodyParser from 'body-parser'
-import { createDrink, getUserDrinks } from './services/drinkService'
+import { createDrink } from './services/drinkService'
 import cors from 'cors'
 import { getGame, getGames, startGame } from './services/gameService'
 import cookieParser from 'cookie-parser'
@@ -40,7 +40,7 @@ app.get('/api/users/me', checkLogin, (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const task = getUserById(token)
+  const task = getUserWithToken(token)
   task().then(
     E.fold(
       error => {
@@ -54,7 +54,7 @@ app.get('/api/users/me', checkLogin, (req, res) => {
     )
   )
 })
-
+/*
 app.get('/api/users/me/drinks', (req, res) => {
   const token = req.get('authorization')
   if (!token) {
@@ -69,7 +69,7 @@ app.get('/api/users/me/drinks', (req, res) => {
       console.error(e)
     })
 })
-
+*/
 app.post('/api/users/', (req, res) => {
   const token = req.get('authorization')
   if (!token) {
@@ -108,8 +108,8 @@ app.post('/api/drinks', (req, res) => {
     })
 })
 
-app.get('/api/games', checkLogin, (_, res) => {
-  const task = getGames()
+app.get('/api/games', checkLogin, (req, res) => {
+  const task = getGames(req.get('authorization'))
   task().then(
     E.fold(
       e => {

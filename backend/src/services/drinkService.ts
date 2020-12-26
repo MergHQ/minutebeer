@@ -1,16 +1,18 @@
 import db from '../database'
 import uuid from 'uuid'
 import R from 'ramda'
+import { taskEither as F } from '../fptsExtensions'
 
 export enum DrinkType {
   ALCOHOL = 0,
   NON_ALCOHOL = 1,
 }
 
-export interface UserDrink {
+export type UserDrink = {
   id?: string
   drinkType: DrinkType
   userId: string
+  gameId: string
 }
 
 export function createDrink(drink: any) {
@@ -19,12 +21,18 @@ export function createDrink(drink: any) {
   return db('user_drinks').insert(validatedDrink).returning(['id']).then(R.identity)
 }
 
-export function getUserDrinks(userId: string) {
-  return db('user_drinks')
-    .select(['drinkType'])
-    .where('userId', userId)
-    .then(res => res as number[])
-}
+export const getUserDrinks = (userId: string) =>
+  F.tryCatch(
+    () =>
+      db('user_drinks')
+        .where('userId', userId)
+        .then(res => res as UserDrink[]),
+    (e: Error) => ({
+      message: 'Cannot get user drinks',
+      status: 500,
+      pureErrorMessage: e.message,
+    })
+  )
 
 function validateDrink(drink: any): UserDrink {
   const { drinkType, userId } = drink
@@ -40,5 +48,6 @@ function validateDrink(drink: any): UserDrink {
     id: uuid.v4(),
     drinkType,
     userId,
+    gameId: '',
   }
 }

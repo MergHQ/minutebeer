@@ -11,7 +11,7 @@ import { TaskEither } from 'fp-ts/lib/TaskEither'
 import { Option } from 'fp-ts/lib/Option'
 
 export interface User {
-  id?: string
+  id: string
   nickname: string
   tkoAlyUserId: number
   email: string
@@ -63,7 +63,7 @@ export function getAllUsers(): Promise<UserDrinksObject[]> {
     .then(toUserDrinksObject)
 }
 
-export const getUserById = (token: string): TaskEither<ServiceError, Option<User>> =>
+export const getUserWithToken = (token: string): TaskEither<ServiceError, Option<User>> =>
   pipe(
     F.tryCatch(
       () => getUserInfo(token),
@@ -95,8 +95,8 @@ function validateUser(
   user: any,
   { id, email, role }: TkoAlyUser
 ): TaskEither<ServiceError, User> {
-  const { nickname, tier } = user
-  if (!nickname || !tier) {
+  const { nickname } = user
+  if (!nickname) {
     return F.left({
       pureErrorMessage: 'Missing post data',
       status: 400,
@@ -115,7 +115,6 @@ function validateUser(
   return F.of({
     id: uuid.v4(),
     nickname,
-    tier,
     tkoAlyUserId: id,
     email,
     role,

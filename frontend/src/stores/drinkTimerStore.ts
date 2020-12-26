@@ -22,7 +22,7 @@ export function drinkTimerStore(initialState: InitialState) {
   const closeDrinkAlertModalS = actionStream(closeDrinkAlertModalAction)
 
   return Bacon.update(
-    initialState.competitionState,
+    { stage: 0 },
     [drinkTimerS],
     (iv, nv) => {
       if (iv.stage === nv) return iv

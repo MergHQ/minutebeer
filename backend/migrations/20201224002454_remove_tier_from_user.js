@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  knex.raw(`alter table users remove column tier;`)
+  knex.raw(`alter table users drop column tier;`)
 }
 
 exports.down = function (knex) {}

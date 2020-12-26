@@ -6,11 +6,13 @@ import { userRegistrationStore } from '../stores/userRegistrationStore'
 import { InitialState } from '../types/InitialState'
 import { pageStateStore } from '../stores/pageStateStore'
 import { User } from '../types/User'
-import CompetitionPage from './competitionPage/competitionModel'
+//import CompetitionPage from './competitionPage/competitionModel'
 import { drinkStore } from '../stores/drinkStore'
 import { drinkTimerStore } from '../stores/drinkTimerStore'
 import { competitionAdminStore } from '../stores/competitionAdminStore'
 import AdminPage from './adminPage/adminPageModel'
+import { UserGame } from '../types/Game'
+import GameListing from './signupPage/components/gameListing'
 
 export function createModel(initialState: InitialState) {
   const drinkTimerP = drinkTimerStore(initialState)
@@ -37,7 +39,7 @@ export function createModel(initialState: InitialState) {
     drinks: drinkStoreP,
     drinkTimer: drinkTimerP
   }).map(({ pageState, user, drinks, drinkTimer }) => {
-    const currentPage = handlePage(pageState, user, drinks, drinkTimer)
+    const currentPage = handlePage(pageState, user, drinks, drinkTimer, initialState.games)
     return (
       <div className="container">
         {currentPage}
@@ -48,10 +50,11 @@ export function createModel(initialState: InitialState) {
   return appP
 }
 
-function handlePage(currentPage: string, user: User, drinks: string[], { stage, isModalOpen }: { stage: number, isModalOpen: boolean }) {
+function handlePage(currentPage: string, user: User, drinks: string[], { stage, isModalOpen }: { stage: number, isModalOpen: boolean }, games: UserGame[]) {
   if (!user) {
     return <Signup />
   } else {
-    return <CompetitionPage user={user} drinks={drinks} currentDrink={stage} isModalOpen={isModalOpen} />
+    return <GameListing games={games} />
+    // return <CompetitionPage user={user} drinks={drinks} currentDrink={stage} isModalOpen={isModalOpen} />
   }
 }
