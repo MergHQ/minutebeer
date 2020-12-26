@@ -15,7 +15,7 @@ export function userRegistrationStore(initialState: InitialState) {
   const updateUserDetailsS = actionStream(updateRegistrationDetailsAction)
   const createUserS = actionStream(createUserAction)
   const updateUserDetailsP = Bacon.update(
-    { nickname: '', tier: 0 },
+    { nickname: '' },
     [updateUserDetailsS],
     (initialValue, newValue) => ({ ...initialValue, ...newValue })
   )
@@ -39,7 +39,7 @@ function createUser(userDetails: any) {
     .post(config.apiEntrypoint + '/api/users', userDetails)
     .then(res => res.data)
     .then(JSON.parse)
-    .then(user => user as { nickname: string; tier: number; token: string })
+    .then(user => user as { nickname: string; token: string })
     .then(user => {
       addTokenToLocalStorage(user)
       return user
@@ -48,13 +48,7 @@ function createUser(userDetails: any) {
   return Bacon.fromPromise(requestPromise)
 }
 
-function addTokenToLocalStorage({
-  token,
-}: {
-  nickname: string
-  tier: number
-  token: string
-}) {
+function addTokenToLocalStorage({ token }: { nickname: string; token: string }) {
   if (typeof window !== 'undefined') {
     localStorage.setItem('token', token)
   }

@@ -13,11 +13,7 @@ export function competitionAdminStore(initialState: InitialState) {
 
   const participantsRequestS = fetchMoreParticipantsS.flatMapLatest(fetchParticipants)
 
-  return Bacon.update(
-    initialState.competitionState.adminStats,
-    [participantsRequestS],
-    (iv, nv) => nv || {}
-  )
+  return Bacon.update({}, [participantsRequestS], (iv, nv) => nv || {})
 }
 
 function fetchParticipants() {

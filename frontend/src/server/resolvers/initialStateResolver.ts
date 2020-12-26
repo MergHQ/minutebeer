@@ -1,10 +1,11 @@
 import * as request from 'request-promise'
-import { User, UserDrinksObject } from '../../types/User'
+import { User } from '../../types/User'
 import { InitialState } from '../../types/InitialState'
-import {
+/*import {
   toNickNameArray,
   userDrinksObjectToDrinkCount,
-} from '../../stores/competitionAdminStore'
+} from '../../stores/competitionAdminStore'*/
+import { UserGame } from '../../types/Game'
 
 const config = require('../../configs/clientConfig.json')
 
@@ -12,18 +13,19 @@ const ENTRYPOINT = config.apiEntrypoint + '/api'
 
 export function resolveInitialState(token: string, path: string): Promise<InitialState> {
   const auth = resolveAuthentication(token)
-  const userDrinks = resolveUserDrinks(token)
-  const gameStage = resolveGameStage()
-  const adminStats = path === '/admin' ? resolveParticipants() : null
-  return Promise.all([auth, userDrinks, gameStage, adminStats])
-    .then(([user, userDrinks, gameStage, adminStats]) => ({
+  //const userDrinks = resolveUserDrinks(token)
+  const games = fetchGames(token)
+  //const adminStats = path === '/admin' ? resolveParticipants() : null
+  return Promise.all([auth, games])
+    .then(([user, games]) => ({
       authentication: user,
       currentPage: path,
-      competitionState: {
+      games,
+      /*competitionState: {
         userDrinks,
         stage: gameStage,
         adminStats,
-      },
+      },*/
     }))
     .then(is => is as InitialState)
 }
@@ -38,7 +40,7 @@ function resolveAuthentication(token: string) {
       return null
     })
 }
-
+/*
 function resolveUserDrinks(token: string) {
   return request
     .get(`${ENTRYPOINT}/users/me/drinks`, { headers: { Authorization: token } })
@@ -49,18 +51,18 @@ function resolveUserDrinks(token: string) {
       return null
     })
 }
-
-function resolveGameStage() {
+*/
+function fetchGames(token: string) {
   return request
-    .get(`${ENTRYPOINT}/game`)
+    .get(`${ENTRYPOINT}/games`, { headers: { Authorization: token } })
     .then(JSON.parse)
-    .then((game: { stage: number }) => game.stage)
+    .then((games: UserGame[]) => games)
     .catch(e => {
       console.error(e)
-      return 0
+      return []
     })
 }
-
+/*
 function resolveParticipants() {
   return request
     .get(`${ENTRYPOINT}/participants`)
@@ -74,3 +76,4 @@ function resolveParticipants() {
       return null
     })
 }
+*/

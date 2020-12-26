@@ -26,14 +26,6 @@ function RegistrationForm(props: any) {
         <Label for="nickname">Nickname</Label>
         <Input type="text" name="nickname" id="nickname" onChange={e => handleNicknameChange(e)} />
       </FormGroup>
-      <FormGroup>
-        <Label for="tier">Tier? (n * tier minutes)</Label>
-        <Input type="select" name="tier" id="tier" onChange={e => handleTierChange(e)}>
-          <option value="0">1</option>
-          <option value="1">2</option>
-          <option value="2">3</option>
-        </Input>
-      </FormGroup>
       <Button>Sit mennään!</Button>
     </Form>
   )
@@ -41,8 +33,4 @@ function RegistrationForm(props: any) {
 
 function handleNicknameChange(e: React.ChangeEvent<HTMLInputElement>) {
   sendAction(updateRegistrationDetailsAction, { nickname: e.target.value })
-}
-
-function handleTierChange(e: React.ChangeEvent<HTMLInputElement>) {
-  sendAction(updateRegistrationDetailsAction, { tier: Number(e.target.value) })
 }

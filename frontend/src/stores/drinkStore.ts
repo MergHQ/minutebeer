@@ -15,11 +15,7 @@ export function drinkStore(initialState: InitialState) {
     .flatMapLatest(addDrink)
     .doAction(() => sendAction(closeDrinkAlertModalAction, null))
 
-  return Bacon.update(
-    initialState.competitionState.userDrinks,
-    [drinkRequestS],
-    (iv, nv) => [...iv, nv]
-  )
+  return Bacon.update([], [drinkRequestS], (iv, nv) => [...iv, nv])
 }
 
 function addDrink(drinkType: DrinkType) {

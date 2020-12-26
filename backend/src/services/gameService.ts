@@ -6,11 +6,27 @@ import db from '../database'
 import { ServiceError } from '../error'
 import { taskEither as F, option as O } from '../fptsExtensions'
 import memoize from '../utils/memoize'
+import { getUserDrinks, UserDrink } from './drinkService'
+import { getUserWithToken } from './userService'
+
+export enum GameState {
+  NOT_STARTED,
+  STARTED,
+  FINISHED,
+}
 
 export type Game = {
   id: string
   maxMinutes: number
   currentMinutes: number
+  state: GameState
+}
+
+export type UserGame = Game & {
+  userGameState: {
+    tier: number
+    current: number
+  }
 }
 
 const sleep = (timeMs: number): Promise<void> =>
@@ -21,14 +37,19 @@ export const startGame = (gameId: string) =>
     getGame(gameId),
     F.map(
       O.map(async g => {
+        await setGameState(gameId, GameState.STARTED)
         for (let m = 0; m < g.maxMinutes; m++) {
           await sleep(60000)
           await increaseMinutes(gameId, m + 1)
         }
+        await setGameState(gameId, GameState.FINISHED)
       })
     ),
     F.mapLeft(e => console.error(e))
   )
+
+const setGameState = (gameId: string, state: GameState) =>
+  db.raw(`update games set state = ? where id = ?`, [state, gameId])
 
 const increaseMinutes = (gameId: string, minute: number) =>
   db.raw('update games set current_minutes = ? where id = ?', [minute, gameId])
@@ -52,21 +73,51 @@ export const getGame = (gameId: string): TaskEither<ServiceError, Option<Game>> 
     F.map(O.map(toGame))
   )
 
-const toGame = ({ id, max_minutes, current_minutes }: any): Game => ({
+const toGame = ({ id, max_minutes, current_minutes, state }: any): Game => ({
   id: id,
   maxMinutes: max_minutes,
   currentMinutes: current_minutes,
+  state,
 })
 
-export const getGames = (): TaskEither<ServiceError, Game[]> =>
+const toUserGame = (drinks: UserDrink[]) => ({
+  userId,
+  tier,
+  ...game
+}: any): UserGame => ({
+  ...toGame(game),
+  userGameState: userId
+    ? {
+        tier,
+        current: drinks.filter(d => d.gameId === game.id).length,
+      }
+    : null,
+})
+
+const getUserGames = (userId: string): TaskEither<ServiceError, any> =>
+  F.tryCatch(
+    () =>
+      db.raw(
+        `select * from games left join participation on (games.id = participation."gameId" and participation."userId" = ?) where state != 2`,
+        [userId]
+      ),
+    (e: Error) => ({
+      message: 'Failed to fetch games',
+      status: 500,
+      pureErrorMessage: e.message,
+    })
+  )
+
+export const getGames = (token: string): TaskEither<ServiceError, UserGame[]> =>
   pipe(
-    F.tryCatch(
-      () => db.raw('select * from games'),
-      (e: Error) => ({
-        message: 'Failed to fetch games',
+    getUserWithToken(token),
+    F.flatMap(
+      F.fromOption(() => ({
+        message: 'Failed to fetch user',
         status: 500,
-        pureErrorMessage: e.message,
-      })
+        pureErrorMessage: 'Failed to fetch user',
+      }))
     ),
-    F.map(gs => gs.rows.map(toGame)) // ughh
+    F.flatMap(({ id }) => F.sequenceArray([getUserGames(id), getUserDrinks(id)])),
+    F.map(([gs, drinks]) => gs.rows.map(toUserGame(drinks))) // ughh
   )
