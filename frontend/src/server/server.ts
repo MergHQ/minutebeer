@@ -69,6 +69,7 @@ server.post('/api/users', (req, res) => {
       body: JSON.stringify(body),
       headers: { 'content-type': 'application/json', authorization: token },
     })
+    .then(() => res.redirect('/'))
     .catch(e => {
       console.error('Error creating user ' + e.message)
       res.redirect('/')

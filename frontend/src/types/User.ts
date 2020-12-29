@@ -6,7 +6,6 @@ export interface User {
   tkoAlyUserId: number
   email: string
   role: string
-  tier: 0 | 1 | 2
 }
 
 export interface UserDrinksObject extends User {

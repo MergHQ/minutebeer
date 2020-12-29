@@ -1,18 +1,19 @@
 import React from 'react'
-import { User } from '../../../types/User'
 import { Progress } from 'reactstrap'
+import { UserGame } from '../../../types/Game'
 
 interface Props {
   drinks: string[]
-  user: User
+  game: UserGame
 }
 
 export default class ProgressBar extends React.Component<Props, any> {
   render() {
-    const { drinks, user } = this.props
-    const { tier } = user
+    const { drinks, game } = this.props
     return (
-      <Progress value={(drinks.length / ((tier + 1) * 31)) * 100} />
+      <Progress
+        value={(drinks.length / ((game.maxMinutes / 3) * game.userGameState.tier)) * 100}
+      />
     )
   }
 }

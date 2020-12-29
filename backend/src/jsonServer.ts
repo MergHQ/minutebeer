@@ -1,19 +1,25 @@
 import express from 'express'
 import {
   getAllUsers,
-  parseUserToken,
   getUserWithToken,
   createUser,
   createUserToken,
 } from './services/userService'
 import * as bodyParser from 'body-parser'
-import { createDrink } from './services/drinkService'
+import { createDrink, getUserDrinksWithToken } from './services/drinkService'
 import cors from 'cors'
-import { getGame, getGames, startGame } from './services/gameService'
+import {
+  createGame,
+  getGame,
+  getGames,
+  participate,
+  startGame,
+} from './services/gameService'
 import cookieParser from 'cookie-parser'
 import * as E from 'fp-ts/Either'
 import { option as O } from './fptsExtensions'
 import { check } from './client/userServiceClient'
+import * as R from 'ramda'
 
 const app = express()
 app.use(bodyParser.json())
@@ -89,23 +95,33 @@ app.post('/api/users/', (req, res) => {
   )
 })
 
-app.post('/api/drinks', (req, res) => {
-  const token = req.get('authorization') ? req.get('authorization') : req.cookies.token
-  console.log(token, req.cookies.token)
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-  const userId = parseUserToken(token)
-  const body = {
-    userId,
-    ...req.body,
-  }
-  createDrink(body)
-    .then(id => res.status(200).json({ id }))
-    .catch(e => {
-      res.status(500).json({ error: 'Internal server error' })
-      console.error(e)
-    })
+app.get('/api/games/:id/drinks', checkLogin, (req, res) => {
+  const task = getUserDrinksWithToken(req.get('authorization'), req.params.id)
+  task().then(
+    E.fold(
+      e => {
+        res.status(e.status).json({ message: e.message })
+        console.error(e.pureErrorMessage)
+      },
+      d => res.json(d)
+    )
+  )
+})
+
+app.post('/api/games/:id/drinks', checkLogin, (req, res) => {
+  const { drinkType } = req.body
+  if (R.isNil(drinkType) || Number(drinkType) === NaN)
+    return res.status(400).json({ message: 'Invalid post body' })
+  const task = createDrink(req.get('authorization'), req.params.id, drinkType)
+  task().then(
+    E.fold(
+      e => {
+        res.status(e.status).json({ message: e.message })
+        console.error(e.pureErrorMessage)
+      },
+      d => res.json(d)
+    )
+  )
 })
 
 app.get('/api/games', checkLogin, (req, res) => {
@@ -141,8 +157,41 @@ app.put('/api/games/:id', checkLogin, (req, res) => {
   const task = startGame(req.params.id)
   task().then(
     E.fold(
-      () => res.status(500).json({ message: 'Game did not start, check logs' }),
+      () => {
+        res.status(500).json({ message: 'Game did not start, check logs' })
+        console.error('Game did not start')
+      },
       () => res.json({ message: 'started' })
+    )
+  )
+})
+
+app.post('/api/games', checkLogin, (req, res) => {
+  const task = createGame(req.body)
+  task().then(
+    E.fold(
+      e => {
+        res.status(e.status).json({ message: e.message })
+        console.error(e.pureErrorMessage)
+      },
+      g => res.json(g)
+    )
+  )
+})
+
+app.post('/api/games/:gameId/participate', checkLogin, (req, res) => {
+  const { tier } = req.body
+  if (!tier || Number(tier) === NaN)
+    return res.status(400).json({ message: 'Invalid post body' })
+
+  const task = participate(req.get('authorization'), req.params.gameId, tier)
+  task().then(
+    E.fold(
+      e => {
+        res.status(e.status).json({ message: e.message })
+        console.error(e.pureErrorMessage)
+      },
+      _ => res.json({ message: 'Participation created' })
     )
   )
 })

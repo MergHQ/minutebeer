@@ -2,6 +2,7 @@ import { pipe } from 'fp-ts/lib/function'
 import { Option } from 'fp-ts/lib/Option'
 import { head } from 'fp-ts/lib/ReadonlyArray'
 import { TaskEither } from 'fp-ts/lib/TaskEither'
+import uuid from 'uuid/v4'
 import db from '../database'
 import { ServiceError } from '../error'
 import { taskEither as F, option as O } from '../fptsExtensions'
@@ -30,7 +31,7 @@ export type UserGame = Game & {
 }
 
 const sleep = (timeMs: number): Promise<void> =>
-  new Promise((resolve, reject) => setTimeout(resolve, timeMs))
+  new Promise((resolve, _) => setTimeout(resolve, timeMs))
 
 export const startGame = (gameId: string) =>
   pipe(
@@ -120,4 +121,78 @@ export const getGames = (token: string): TaskEither<ServiceError, UserGame[]> =>
     ),
     F.flatMap(({ id }) => F.sequenceArray([getUserGames(id), getUserDrinks(id)])),
     F.map(([gs, drinks]) => gs.rows.map(toUserGame(drinks))) // ughh
+  )
+
+const validateAndInsert = ({ maxMinutes }: any): Promise<Game> => {
+  if (!maxMinutes || Number(maxMinutes) === NaN) {
+    return Promise.reject({
+      message: 'Invalid post data',
+      status: 400,
+      pureErrorMessage: 'Invalid post data',
+    })
+  }
+  const id = uuid()
+  return db('games')
+    .insert({
+      id,
+      max_minutes: maxMinutes,
+      current_minutes: 0,
+      state: 0,
+    })
+    .catch((e: Error) => ({
+      message: 'Failed to insert to DB',
+      status: 500,
+      pureErrorMessage: e.message,
+    }))
+    .then(() => ({
+      id,
+      maxMinutes,
+      currentMinutes: 0,
+      state: 0,
+    }))
+}
+
+export const createGame = (body: any) =>
+  F.tryCatch(
+    () => validateAndInsert(body),
+    (e: ServiceError) => e
+  )
+
+const createParticipation = (userId: string, gameId: string, tier: number) =>
+  F.tryCatch(
+    () => db('participation').insert({ userId, gameId, tier }),
+    (e: Error) => ({
+      message: 'Failed to insert to DB',
+      status: 500,
+      pureErrorMessage: e.message,
+    })
+  )
+
+export const participate = (token: string, gameId: string, tier: number) =>
+  pipe(
+    getUserWithToken(token),
+    F.flatMap(
+      F.fromOption(() => ({
+        message: 'Cannot find user',
+        status: 400,
+        pureErrorMessage: 'Cannot find user',
+      }))
+    ),
+    F.flatMap(({ id }) => createParticipation(id, gameId, tier))
+  )
+
+export const isParticipant = (userId: string, gameId: string) =>
+  F.tryCatch(
+    () =>
+      db
+        .raw('select count(*) from participation where "userId" = ? and "gameId" = ?', [
+          userId,
+          gameId,
+        ])
+        .then(v => Number(v.rows[0].count) > 0),
+    () => ({
+      message: 'Cannot resolve participation',
+      status: 500,
+      pureErrorMessage: 'Cannot resolve participation',
+    })
   )
