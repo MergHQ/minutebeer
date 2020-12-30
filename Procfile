@@ -1,0 +1,1 @@
+web: node ./frontend/dist/js/server.js

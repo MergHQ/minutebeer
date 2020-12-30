@@ -1,4 +1,4 @@
 {
-  "apiEntrypoint": "http://localhost:8082",
+  "apiEntrypoint": "https://minutedrink-api.tko-aly.fi",
   "socketURI": "ws://localhost:8083"
 }
