@@ -1,15 +1,11 @@
 FROM node:14-alpine
 
-ENV YARN_CACHE_FOLDER=/dev/shm/yarn-cache
-
 WORKDIR /app
 
-RUN npm install --global yarn@1.10.1
-
-COPY yarn.lock package.json /app/
-RUN yarn --dev --frozen-lockfile
-RUN yarn global add typescript ts-node
-
-COPY . /app/
+COPY yarn.lock package.json tsconfig.json knexfile.js /app/
+COPY ./src /app/src
+COPY ./migrations /app/migrations
+RUN yarn --dev
+RUN yarn build
 
 CMD ["yarn", "start"]

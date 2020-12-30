@@ -9,6 +9,6 @@ export const addDrinkAction: Action<{ drinkType: DrinkType; gameId: string }> = 
 export const gameStateUpdateAction: Action<number> = 'drinkAction'
 export const openDrinkAlertModalAction: Action<any> = 'openDrinkAlertModal'
 export const closeDrinkAlertModalAction: Action<any> = 'closeDrinkAlertModal'
-export const fetchMoreParticipantsAction: Action<any> = 'fetcMoreParticipants'
+export const fetchMoreParticipantsAction: Action<string> = 'fetcMoreParticipants'
 export const setCurrentGameAction: Action<{ id: string; tier: number }> = 'setCurrentGame'
 export const openTierSelectionAction: Action<UserGame> = 'openTierSelection'

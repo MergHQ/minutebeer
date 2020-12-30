@@ -15,27 +15,39 @@ import GameListing from './signupPage/components/gameListing'
 import gameStore from '../stores/gameStore'
 import CompetitionPage from './competitionPage/competitionModel'
 import TierSelection from './signupPage/components/tierSelection'
+import { sendAction } from '../utils/actionDispatcher'
+import { setCurrentGameAction } from '../utils/actions'
 
 export function createModel(initialState: InitialState) {
-  const drinkTimerP = drinkTimerStore(initialState)
+  const gameStoreP = gameStore(initialState)
 
   // TODO: Hadle routung and stores better
-  if (initialState.currentPage === '/admin') {
+  if (initialState.currentPage.startsWith('/admin')) {
+    if (typeof window !== 'undefined') {
+      ;(window as any).startPoll = () =>
+        sendAction(setCurrentGameAction, { id: initialState.gameId || '', tier: 3 })
+    }
     const adminStatsStoreP = competitionAdminStore(initialState)
     return Bacon.combineTemplate({
-      drinkTimer: drinkTimerP,
+      gameStore: gameStoreP,
       adminStats: adminStatsStoreP,
-    }).map(({ drinkTimer, adminStats }) => (
-      <div className="container">
-        <AdminPage currentDrink={drinkTimer.stage} adminStats={adminStats} />
-      </div>
-    ))
+    }).map(
+      ({ gameStore, adminStats }) =>
+        gameStore.chosenGame && (
+          <div className="container">
+            <AdminPage
+              currentDrink={gameStore.currentGameMinute}
+              adminStats={adminStats}
+              gameId={gameStore.chosenGame.id}
+            />
+          </div>
+        )
+    )
   }
-
+  const drinkTimerP = drinkTimerStore(initialState)
   const userP = userRegistrationStore(initialState)
   const pageStateP = pageStateStore(initialState)
   const drinkStoreP = drinkStore(initialState)
-  const gameStoreP = gameStore(initialState)
   const appP = Bacon.combineTemplate({
     pageState: pageStateP,
     user: userP,

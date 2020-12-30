@@ -4,11 +4,12 @@ import { fetchMoreParticipantsAction } from '../../utils/actions'
 import StatCard from './components/StatCard'
 
 interface Props {
-  currentDrink: number,
+  currentDrink: number
+  gameId: string
   adminStats: {
-    participants: string[],
-    drinks: number,
-    nonHolic: number,
+    participants: string[]
+    drinks: number
+    nonHolic: number
     holic: number
   }
 }
@@ -34,6 +35,6 @@ export default class AdminPage extends React.Component<Props, any> {
   }
 
   componentDidMount() {
-    setInterval(() => sendAction(fetchMoreParticipantsAction, 0), 2000)
+    setInterval(() => sendAction(fetchMoreParticipantsAction, this.props.gameId), 2000)
   }
 }

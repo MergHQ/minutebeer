@@ -20,12 +20,15 @@ import * as E from 'fp-ts/Either'
 import { option as O } from './fptsExtensions'
 import { check } from './client/userServiceClient'
 import * as R from 'ramda'
+import { getStats } from './services/statsService'
+import morgan from 'morgan'
 
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded())
 app.use(cors())
 app.use(cookieParser())
+app.use(morgan('tiny'))
 
 const checkLogin = (
   req: express.Request,
@@ -192,6 +195,19 @@ app.post('/api/games/:gameId/participate', checkLogin, (req, res) => {
         console.error(e.pureErrorMessage)
       },
       _ => res.json({ message: 'Participation created' })
+    )
+  )
+})
+
+app.get('/api/stats/:gameId', checkLogin, (req, res) => {
+  const task = getStats(req.params.gameId)
+  task().then(
+    E.fold(
+      e => {
+        res.status(e.status).json({ message: e.message })
+        console.error(e.pureErrorMessage)
+      },
+      stats => res.json(stats)
     )
   )
 })

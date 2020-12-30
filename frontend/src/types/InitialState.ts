@@ -1,3 +1,4 @@
+import { AdminStats } from './AdminStats'
 import { UserGame } from './Game'
 import { User } from './User'
 
@@ -5,15 +6,6 @@ export interface InitialState {
   authentication: User
   currentPage: string
   games: UserGame[]
-  /*competitionState: {
-    userDrinks: { drinkType: number }[]
-    stage: number
-    isModalOpen: boolean
-    adminStats: {
-      participants: string[]
-      totalDrinks: number
-      nonHolic: number
-      holic: number
-    }
-  }*/
+  adminStats: AdminStats
+  gameId: string | null
 }

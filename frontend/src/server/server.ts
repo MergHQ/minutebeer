@@ -30,7 +30,7 @@ const checkLogin = (
 }
 
 server.get('/', checkLogin, async (req, res) => {
-  const initialState = await resolveInitialState(req.cookies.token, req.path)
+  const initialState = await resolveInitialState(req.cookies.token, req.path, null)
   const appP = createModel(initialState)
   console.log(initialState)
   appP.first().onValue(container => {
@@ -45,10 +45,13 @@ server.get('/', checkLogin, async (req, res) => {
   })
 })
 
-server.get('/admin', authorizeAdminView, async (req, res) => {
-  const initialState = await resolveInitialState(req.cookies.token, req.path)
+server.get('/admin/:gameId', async (req, res) => {
+  const initialState = await resolveInitialState(
+    req.cookies.token,
+    req.path,
+    req.params.gameId
+  )
   const appP = createModel(initialState)
-  console.log(initialState)
   appP.first().onValue(container => {
     const body = ReactServer.renderToString(container)
     res.send(
@@ -75,26 +78,5 @@ server.post('/api/users', (req, res) => {
       res.redirect('/')
     })
 })
-
-function authorizeAdminView(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {
-  const authStr = req.get('authorization')
-  if (!authStr) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Node"')
-    res.status(401).json({ error: 'Unauthorized' })
-    return
-  }
-  const decodedAuthStr = new Buffer(authStr.split(' ')[1], 'base64').toString('utf8')
-  const [username, password] = decodedAuthStr.split(':')
-  if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASSWORD) {
-    next()
-  } else {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Node"')
-    res.status(401).json({ error: 'Unauthorized' })
-  }
-}
 
 server.listen(PORT, () => console.log('Listening on port', PORT))

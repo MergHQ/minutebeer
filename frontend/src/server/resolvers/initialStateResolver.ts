@@ -6,26 +6,27 @@ import { InitialState } from '../../types/InitialState'
   userDrinksObjectToDrinkCount,
 } from '../../stores/competitionAdminStore'*/
 import { UserGame } from '../../types/Game'
+import { AdminStats } from '../../types/AdminStats'
 
 const config = require('../../configs/clientConfig.json')
 
 const ENTRYPOINT = config.apiEntrypoint + '/api'
 
-export function resolveInitialState(token: string, path: string): Promise<InitialState> {
+export function resolveInitialState(
+  token: string,
+  path: string,
+  gameId: string | null
+): Promise<InitialState> {
   const auth = resolveAuthentication(token)
-  //const userDrinks = resolveUserDrinks(token)
   const games = fetchGames(token)
-  //const adminStats = path === '/admin' ? resolveParticipants() : null
-  return Promise.all([auth, games])
-    .then(([user, games]) => ({
+  const adminStatsP = path.startsWith('/admin') ? getAdminStats(token, gameId) : null
+  return Promise.all([auth, games, adminStatsP])
+    .then(([user, games, adminStats]) => ({
       authentication: user,
       currentPage: path,
       games,
-      /*competitionState: {
-        userDrinks,
-        stage: gameStage,
-        adminStats,
-      },*/
+      adminStats,
+      gameId,
     }))
     .then(is => is as InitialState)
 }
@@ -40,18 +41,7 @@ function resolveAuthentication(token: string) {
       return null
     })
 }
-/*
-function resolveUserDrinks(token: string) {
-  return request
-    .get(`${ENTRYPOINT}/users/me/drinks`, { headers: { Authorization: token } })
-    .then(JSON.parse)
-    .then((drinks: { drinkType: number }[]) => drinks)
-    .catch(e => {
-      console.error(e)
-      return null
-    })
-}
-*/
+
 function fetchGames(token: string) {
   return request
     .get(`${ENTRYPOINT}/games`, { headers: { Authorization: token } })
@@ -62,18 +52,9 @@ function fetchGames(token: string) {
       return []
     })
 }
-/*
-function resolveParticipants() {
-  return request
-    .get(`${ENTRYPOINT}/participants`)
+
+const getAdminStats = (token: string, gameId: string) =>
+  request
+    .get(`${ENTRYPOINT}/stats/${gameId}`, { headers: { Authorization: token } })
     .then(JSON.parse)
-    .then((data: UserDrinksObject[]) => ({
-      participants: toNickNameArray(data),
-      ...userDrinksObjectToDrinkCount(data),
-    }))
-    .catch(e => {
-      console.error(e)
-      return null
-    })
-}
-*/
+    .then(stats => stats as AdminStats)
